@@ -10,7 +10,6 @@ const httpStatus = require("./utils/httpStatus");
 const connectDB = require("./utils/db");
 const { removeUpload } = require("./utils/uploads");
 
-// fail fast on missing / weak configuration
 const {
   MONGO_URL,
   JWT_SECRET_KEY,
@@ -19,10 +18,22 @@ const {
   CORS_ORIGIN,
   TRUST_PROXY,
 } = process.env;
-if (!MONGO_URL) throw new Error("MONGO_URL is not set");
-if (!BLOB_READ_WRITE_TOKEN) throw new Error("BLOB_READ_WRITE_TOKEN is not set");
+
+// started with "node index.js" (npm start / npm run dev), not imported by Vercel
+const runsStandalone = require.main === module && !process.env.VERCEL;
+
+// check configuration (only variable NAMES are reported, never their values)
+const configErrors = [];
+if (!MONGO_URL) configErrors.push("MONGO_URL is not set");
+if (!BLOB_READ_WRITE_TOKEN) configErrors.push("BLOB_READ_WRITE_TOKEN is not set");
 if (!JWT_SECRET_KEY || JWT_SECRET_KEY.length < 32) {
-  throw new Error("JWT_SECRET_KEY must be set and at least 32 characters");
+  configErrors.push("JWT_SECRET_KEY must be set and at least 32 characters");
+}
+if (configErrors.length) {
+  // locally: stop right away. On Vercel a throw here only shows an opaque
+  // FUNCTION_INVOCATION_FAILED, so we answer every request with the reason instead
+  if (runsStandalone) throw new Error(configErrors.join("; "));
+  console.error("server misconfigured:", configErrors.join("; "));
 }
 
 // optional, local dev only: some Windows setups (VPN / DNS clients) make Node
@@ -34,6 +45,18 @@ if (process.env.DNS_SERVERS) {
 const app = express();
 
 app.disable("x-powered-by");
+
+if (configErrors.length) {
+  app.use((req, res) =>
+    res.status(httpStatus.INTERNAL_SERVER).json({
+      status: httpStatus.ERROR,
+      message: "server misconfigured, check the environment variables",
+      details: configErrors,
+      data: null,
+      code: httpStatus.INTERNAL_SERVER,
+    })
+  );
+}
 
 // behind a hosting proxy (Vercel, Render, nginx...) so req.ip is the real
 // client IP; without it the login rate limit would be shared by everyone
@@ -142,7 +165,7 @@ app.use(async (error, req, res, next) => {
 
 // Vercel imports this file and runs the exported app as a serverless function;
 // locally (npm start / npm run dev) we start a normal HTTP server
-if (!process.env.VERCEL) {
+if (runsStandalone) {
   connectDB()
     .then(() => {
       console.log("MongoDB connected...");
