@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { staticImage } = require("../utils/uploads");
 
 const aboutSchema = new mongoose.Schema({
   name: {
@@ -18,7 +19,7 @@ const aboutSchema = new mongoose.Schema({
 
   imageSrc: {
     type: String,
-    default: "uploads/about/about-img.png",
+    default: () => staticImage("about/about-img.png"),
   },
 
   cvURL: {

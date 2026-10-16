@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { staticImage } = require("../utils/uploads");
 
 const homeSchema = new mongoose.Schema({
   name: {
@@ -18,7 +19,7 @@ const homeSchema = new mongoose.Schema({
 
   imageSrc: {
     type: String,
-    default: "uploads/home/main-img.png",
+    default: () => staticImage("home/main-img.png"),
   },
 
   facebook: {

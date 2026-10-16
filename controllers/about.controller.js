@@ -30,10 +30,7 @@ const updateAboutData = asyncWrapper(async (req, res, next) => {
     { new: false, runValidators: true }
   );
 
-  if (!previous) {
-    await removeUpload(updates.imageSrc); // the new file is orphaned
-    return next(notFound());
-  }
+  if (!previous) return next(notFound());
 
   if (updates.imageSrc && updates.imageSrc !== previous.imageSrc) {
     await removeUpload(previous.imageSrc);

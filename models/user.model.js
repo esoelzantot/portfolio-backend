@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { staticImage } = require("../utils/uploads");
 const validator = require("validator");
 
 const userRoles = require("../utils/userRoles");
@@ -34,7 +35,7 @@ const userSchema = new mongoose.Schema(
 
     avatar: {
       type: String,
-      default: "uploads/avatar.jpg",
+      default: () => staticImage("avatar.jpg"),
     },
 
     role: {

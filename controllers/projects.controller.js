@@ -78,10 +78,7 @@ const updateProject = asyncWrapper(async (req, res, next) => {
     { new: false, runValidators: true }
   );
 
-  if (!previous) {
-    await removeUpload(updates.imgSrc);
-    return next(notFound());
-  }
+  if (!previous) return next(notFound());
 
   if (updates.imgSrc && updates.imgSrc !== previous.imgSrc) {
     await removeUpload(previous.imgSrc);

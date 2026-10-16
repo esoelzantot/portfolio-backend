@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { staticImage } = require("../utils/uploads");
 
 const skillSchema = new mongoose.Schema({
   category: {
@@ -19,7 +20,7 @@ const skillSchema = new mongoose.Schema({
       },
       image: {
         type: String,
-        default: "uploads/skills/skill-img.jpg",
+        default: () => staticImage("skills/skill-img.jpg"),
       },
     },
   ],

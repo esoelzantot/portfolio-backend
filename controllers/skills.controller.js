@@ -86,10 +86,7 @@ const addSkillItem = asyncWrapper(async (req, res, next) => {
     { new: true, runValidators: true }
   );
 
-  if (!skill) {
-    await removeUpload(newItem.image);
-    return next(skillNotFound());
-  }
+  if (!skill) return next(skillNotFound());
 
   return res.status(201).json({
     status: httpStatus.SUCCESS,
@@ -116,10 +113,7 @@ const updateSkillItem = asyncWrapper(async (req, res, next) => {
   const skill = await Skill.findById(req.params.id);
   const skillItem = skill?.skillsList.id(req.params.itemId);
 
-  if (!skillItem) {
-    await removeUpload(updates.image);
-    return next(skill ? itemNotFound() : skillNotFound());
-  }
+  if (!skillItem) return next(skill ? itemNotFound() : skillNotFound());
 
   const previousImage = skillItem.image;
 

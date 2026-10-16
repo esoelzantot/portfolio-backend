@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { staticImage } = require("../utils/uploads");
 
 const projectSchema = new mongoose.Schema({
   title: {
@@ -23,7 +24,7 @@ const projectSchema = new mongoose.Schema({
 
   imgSrc: {
     type: String,
-    default: "uploads/projects/project-img.jpg",
+    default: () => staticImage("projects/project-img.jpg"),
   },
 
   features: [
